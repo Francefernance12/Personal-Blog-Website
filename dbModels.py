@@ -17,11 +17,11 @@ class Base(DeclarativeBase):
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-    subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
-    date: Mapped[str] = mapped_column(String(250), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
+    subtitle: Mapped[str] = mapped_column(String(500), nullable=False)
+    date: Mapped[str] = mapped_column(String(500), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    img_url: Mapped[str] = mapped_column(String(250), nullable=False)
+    img_url: Mapped[str] = mapped_column(String(500), nullable=False)
     # Relationship
     author_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     author = relationship("User", back_populates="posts")
@@ -32,9 +32,9 @@ class BlogPost(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    email: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-    username: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    email: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(500), nullable=False)
     # relationship
     posts = relationship("BlogPost", back_populates="author")
     comments = relationship("Comments", back_populates="comment_author")
