@@ -13,7 +13,7 @@ class CreatePostForm(FlaskForm):
     submit = SubmitField("Submit Post")
 
 
-# TODO: Create a RegisterForm to register new users
+# RegisterForm
 class UserForm(FlaskForm):
     email = StringField("Email", validators=[
         DataRequired(),
