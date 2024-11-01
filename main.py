@@ -1,13 +1,18 @@
+import smtplib
 from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 from flask_login import login_user, LoginManager, current_user, logout_user, login_required
 from functools import wraps
+from os import getenv
+from dotenv import load_dotenv
 # Importing personal module
-from forms import CreatePostForm, UserForm, LoginForm, CommentForm
+from forms import CreatePostForm, UserForm, LoginForm, CommentForm, ContactForm
 from config import Config
 from dbModels import db, User, BlogPost, Comments
+
+load_dotenv()
 
 # Flask app
 app = Flask(__name__)
@@ -32,7 +37,7 @@ with app.app_context():
     db.create_all()
 
 
-# creates admin decorator
+# Creates admin decorator
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -201,9 +206,35 @@ def about():
     return render_template("about.html", logged_in=current_user.is_authenticated)
 
 
-@app.route("/contact")
+@app.route("/contact", methods=['GET', 'POST'])
 def contact():
-    return render_template("contact.html", logged_in=current_user.is_authenticated)
+    msg_sent = False
+    form = ContactForm()
+    if form.validate_on_submit():
+        recipient = getenv("RECIPIENT_EMAIL")
+        app_password = getenv("APP_PASSWORD")
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587) as connection:  # Port 587 for TLS
+                connection.starttls()  # Secure the connection
+                connection.login(user=recipient, password=app_password)
+                message = (
+                    f"Subject:Blog Contact Message\n\n"
+                    f"Name: {form.name.data}\n"
+                    f"Email: {form.email.data}\n"
+                    f"Phone: {form.phone.data}\n\n"
+                    f"Message: {form.message.data}"
+                )
+                connection.sendmail(
+                    from_addr=form.email.data,
+                    to_addrs=recipient,
+                    msg=message
+                )
+            msg_sent = True
+        except Exception as e:
+            # Log or print the exception for debugging
+            print(f"Failed to send email: {e}")
+
+    return render_template("contact.html", logged_in=current_user.is_authenticated, form=form, msg_sent=msg_sent)
 
 
 if __name__ == "__main__":

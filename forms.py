@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, URL, Email, Length, EqualTo
+from wtforms.validators import DataRequired, URL, Email, Length, EqualTo, Regexp
 from flask_ckeditor import CKEditorField
 
 
@@ -34,12 +34,25 @@ class UserForm(FlaskForm):
     submit = SubmitField("Register")
 
 
+# Login Form
+
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 
+# Post Comments
 class CommentForm(FlaskForm):
     comment = CKEditorField('Comment', validators=[DataRequired()])
     submit = SubmitField("Submit Comment")
+
+
+# Contact Form
+
+class ContactForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    phone = StringField("Phone Number", validators=[DataRequired(), Regexp(r'^\+?\d{10,15}$', message="Invalid phone number format.")])
+    message = CKEditorField("Message", validators=[DataRequired()])
+    submit = SubmitField("Submit")
