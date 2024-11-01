@@ -71,8 +71,13 @@ def register():
         new_user.set_password(password)
 
         # add user to db
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred while saving to the database. Please try again.')
+            print(f"Database error: {e}")
 
         # log user in
         login_user(new_user)
@@ -235,6 +240,17 @@ def contact():
             print(f"Failed to send email: {e}")
 
     return render_template("contact.html", logged_in=current_user.is_authenticated, form=form, msg_sent=msg_sent)
+
+
+# Error handling
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 
 if __name__ == "__main__":
