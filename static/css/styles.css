@@ -10827,7 +10827,7 @@ header.masthead .post-heading .meta a {
 .commentList {
   padding:0;
   list-style:none;
-  max-height:200px;
+  max-height:400px;
   overflow:auto;
 }
 .commentList li {
