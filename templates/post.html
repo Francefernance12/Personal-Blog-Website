@@ -35,32 +35,33 @@
             >
           </div>
         {% endif %}
-
-        <!-- Comments Area -->
-        <!-- Load the CKEditor -->
-        {{ ckeditor.load() }}
-        <!-- Configure it with the name of the form field from CommentForm -->
-        {{ ckeditor.config(name='comment_text') }}
-        <!-- Create the wtf quick form from CommentForm -->
-        {{ render_form(comment_form, novalidate=True, button_map={"submit": "primary"}) }}
-        <div class="comment">
-          <ul class="commentList">
-            {% for comment in post.comments: %}
-              <li>
-                <div class="commenterImage" style="margin-right: 30px;">
-                  <img src="https://avatars.dicebear.com/api/bottts/{{ comment.comment_author.username }}.svg?size=400"
-                       alt="User Avatar" style="width: 50px; height: 50px;">
-                </div>
-                <div class="commentText">
-                  <p>{{ comment.text|safe }}</p>
-                  <span class="date sub-text">{{ comment.comment_author.username }}</span>
-                </div>
-                {% if current_user.id == 1 %}
-                  <a href="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}">✘</a>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
+        <div class="ckeditor-container">
+          <!-- Comments Area -->
+          <!-- Load the CKEditor -->
+          {{ ckeditor.load() }}
+          <!-- Configure it with the name of the form field from CommentForm -->
+          {{ ckeditor.config(name='comment_text', removePlugins='notification') }}
+          <!-- Create the wtf quick form from CommentForm -->
+          {{ render_form(comment_form, novalidate=True, button_map={"submit": "primary"}) }}
+          <div class="comment">
+            <ul class="commentList">
+              {% for comment in post.comments: %}
+                <li>
+                  <div class="commenterImage" style="margin-right: 30px;">
+                    <img src="https://avatars.dicebear.com/api/bottts/{{ comment.comment_author.username }}.svg?size=400"
+                         alt="User Avatar" style="width: 50px; height: 50px;">
+                  </div>
+                  <div class="commentText">
+                    <p>{{ comment.text|safe }}</p>
+                    <span class="date sub-text">{{ comment.comment_author.username }}</span>
+                  </div>
+                  {% if current_user.id == 1 %}
+                    <a href="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}">✘</a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

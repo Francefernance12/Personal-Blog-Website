@@ -3,8 +3,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const mainNav = document.getElementById('mainNav');
     const headerHeight = mainNav.clientHeight;
 
-    window.addEventListener('scroll', function() {
-        const currentTop = document.body.getBoundingClientRect().top * -1;
+    window.addEventListener('scroll', () => {
+        const currentTop = -document.body.getBoundingClientRect().top;
 
         if (currentTop < scrollPos) {
             // Scrolling Up
@@ -29,6 +29,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // Reset form if the message has been sent
     const msgSent = {{ msg_sent | tojson }};
     if (msgSent) {
-        document.querySelector('form').reset();
+        const form = document.querySelector('form');
+        if (form) form.reset();
     }
+
 });

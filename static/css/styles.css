@@ -91,6 +91,15 @@
   }
 }
 
+/* CSS to hide notifications within the .ckeditor-container */
+.ckeditor-container .cke_notification,
+.ckeditor-container .cke_notification_warning,
+.cke_notification_message, .cke_notification_close,
+.cke_notification_warning{
+    display: none !important;
+}
+
+
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);
