@@ -1,10 +1,17 @@
-Project Name
+Personal Blog Website
 ============
 
 Description
 -----------
-Blog Website hosted from Pythonanywhere
+A personal blog website where Fernando shares his thoughts, experiences and stories
+
+Features
+-----------
+- User accounts
+- Blog comments
+- Contact me!
 
 URL
 ------------
+Personal Blog Website hosted from Pythonanywhere:
 https://francefernance12.pythonanywhere.com
