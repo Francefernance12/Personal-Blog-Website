@@ -7,17 +7,18 @@ from flask_login import login_user, LoginManager, current_user, logout_user, log
 from functools import wraps
 from os import getenv
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 # Importing personal module
 from forms import CreatePostForm, UserForm, LoginForm, CommentForm, ContactForm
 from config import Config
-from dbModels import db, User, BlogPost, Comments
+from dbModels import db, User, BlogPost, Comments, Roles
 
 load_dotenv()
 
 # Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
-
+migrate = Migrate(app, db)
 # Initialize extensions
 Bootstrap5(app)
 ckeditor = CKEditor(app)
@@ -37,19 +38,32 @@ with app.app_context():
     db.create_all()
 
 
-# Creates admin decorator
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # If id is not 1 then return abort with 403 error
-        if not current_user.is_authenticated or current_user.id != 1:
-            return abort(403)
-        return f(*args, **kwargs)
+# Creates role decorator
+def role_required(role_names):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            print(f"Checking roles for user: {current_user.username if current_user.is_authenticated else 'Guest'}")
+            if not current_user.is_authenticated:
+                print("User is not authenticated.")
+                abort(403)
+            if current_user.role.name not in role_names:
+                print(f"Access denied. Role '{current_user.role.name}' not in {role_names}.")
+                abort(403)
+            print("Access granted.")
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
-    return decorated_function
 
+# roles_required
+WEBSITE_ROLES = ["Administrator", "Editor", "User"]
+ADMIN_ROLES = [WEBSITE_ROLES[0]]
+EDIT_ROLES = WEBSITE_ROLES[:2]
 
 # Routes
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     register_form = UserForm()
@@ -66,8 +80,11 @@ def register():
             flash('User already exists. Please log in.')
             return redirect(url_for('register'))
 
+        # assigning roles to new registered users
+        user_role_id = db.session.query(Roles).filter_by(name='User').first().id
+
         # Create a new User object
-        new_user = User(email=email, username=username)
+        new_user = User(email=email, username=username, role_id=user_role_id)
         new_user.set_password(password)
 
         # add user to db
@@ -147,8 +164,9 @@ def show_post(post_id):
 
 
 @app.route("/new-post", methods=["GET", "POST"])
-@admin_required
+@role_required(ADMIN_ROLES)
 def add_new_post():
+    print("Entered add_new_post route")
     form = CreatePostForm()
     if form.validate_on_submit():
         new_post = BlogPost(
@@ -157,16 +175,21 @@ def add_new_post():
             body=form.body.data,
             img_url=form.img_url.data,
             author=current_user,
-            date=date.today().strftime("%B %d, %Y")
+            creation_date=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_post)
-        db.session.commit()
+        try:
+            db.session.commit()
+            print("Post added to database")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Database error: {e}")
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form, logged_in=current_user.is_authenticated)
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
-@admin_required
+@role_required(EDIT_ROLES)
 def edit_post(post_id):
     post = db.get_or_404(BlogPost, post_id)
     edit_form = CreatePostForm(
@@ -188,7 +211,7 @@ def edit_post(post_id):
 
 
 @app.route("/delete/<int:post_id>")
-@admin_required
+@role_required(ADMIN_ROLES)
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
     db.session.delete(post_to_delete)
@@ -198,7 +221,7 @@ def delete_post(post_id):
 
 #
 @app.route("/delete-comment/<int:post_id>/<int:comment_id>")
-@admin_required
+@role_required(ADMIN_ROLES)
 def delete_comment(post_id, comment_id):
     comment_to_delete = db.get_or_404(Comments, comment_id)
     db.session.delete(comment_to_delete)
@@ -254,4 +277,4 @@ def internal_server_error(e):
 
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5002)
+    app.run(debug=True, port=5002)
