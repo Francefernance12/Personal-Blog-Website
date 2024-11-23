@@ -41,7 +41,7 @@
               Posted by
               <a href="#">{{post.author}}</a>
               on {{post.date}}
-              {% if current_user.id == 1 %}
+              {% if current_user.is_authenticated and current_user.role.can_delete_posts %}
                 <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
               {% endif %}
             </p>
@@ -52,11 +52,11 @@
       <hr class="my-4" />
 
       <!-- New Post -->
-      {% if current_user.id == 1 %}
+      {% if current_user.is_authenticated and current_user.role.can_make_posts %}
         <div class="d-flex justify-content-end mb-4">
           <a
             class="btn btn-primary float-right"
-            href="{{url_for('add_new_post')}}"
+            href="{{ url_for('add_new_post') }}"
             >Create New Post</a
           >
         </div>
