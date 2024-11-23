@@ -33,9 +33,33 @@ def load_user(user_id):
     return db.get_or_404(User, user_id)
 
 
-# create db
+# roles_required
+WEBSITE_ROLES = ["Administrator", "Editor", "User"]
+ADMIN_ROLES = [WEBSITE_ROLES[0]]
+EDIT_ROLES = WEBSITE_ROLES[:2]
+
+# create db & roles
 with app.app_context():
     db.create_all()
+
+    # create roles
+    admin_role = Roles.query.filter_by(name=WEBSITE_ROLES[0]).first()
+    if not admin_role:
+        admin_role = Roles(name=WEBSITE_ROLES[0])
+        db.session.add(admin_role)
+        db.session.commit()
+
+    editor_role = Roles.query.filter_by(name=WEBSITE_ROLES[1]).first()
+    if not editor_role:
+        editor_role = Roles(name=WEBSITE_ROLES[1])
+        db.session.add(editor_role)
+        db.session.commit()
+
+    user_role = Roles.query.filter_by(name=WEBSITE_ROLES[2]).first()
+    if not user_role:
+        editor_role = Roles(name=WEBSITE_ROLES[2])
+        db.session.add(editor_role)
+        db.session.commit()
 
 
 # Creates role decorator
@@ -55,11 +79,6 @@ def role_required(role_names):
         return decorated_function
     return decorator
 
-
-# roles_required
-WEBSITE_ROLES = ["Administrator", "Editor", "User"]
-ADMIN_ROLES = [WEBSITE_ROLES[0]]
-EDIT_ROLES = WEBSITE_ROLES[:2]
 
 # Routes
 
