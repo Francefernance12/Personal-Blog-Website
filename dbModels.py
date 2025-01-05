@@ -20,7 +20,7 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
     username: Mapped[str] = mapped_column(String(500), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(500), nullable=False)
-    # relationship
+    # Foreign Key
     role_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("roles.id"), nullable=False)
     # relationship
     role = relationship("Roles", back_populates="user")
